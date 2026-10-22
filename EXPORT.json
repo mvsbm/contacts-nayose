@@ -3,7 +3,7 @@
  "api": "contacts-nayose",
  "release": "1.0.0",
  "workflow_id": "687ef588-18dd-46a2-a4d2-83a14053e5fe",
- "studio_version": "b2229fe2c1bb6cb5dc85de6ee860aece42f5f60f",
+ "studio_version": "3d43d1aa678e3e7f9ad5c535865f4bbb2639ee52",
  "core": {
   "__init__.py": "2b375360b845f1f9",
   "candidates.py": "841eb81311ab15a1",

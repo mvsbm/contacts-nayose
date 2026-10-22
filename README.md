@@ -15,6 +15,9 @@ contacts-nayose run --config config.yaml --out out
 contacts-nayose check                   # the examples and every stage Check
 ```
 
+The same commands work on Windows, macOS and Linux (Python 3.12 or later; on Windows, in
+PowerShell or cmd, with `py -m pip install .`).
+
 Results go to `out/`: `entities`, `review_queue`. When the workflow asks you to review pairs, it writes
 `out/review_batch.csv`: fill its `decision` column (same / different), then run again with
 `--reviews out/review_batch.csv`. Every decision so far is kept in `out/reviews.csv`.

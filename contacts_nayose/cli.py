@@ -102,6 +102,9 @@ def init(args) -> int:
 
 
 def main(argv=None) -> None:
+    for stream in (sys.stdout, sys.stderr):  # Windows writes a pipe or file in its code page otherwise
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
     parser = argparse.ArgumentParser(prog=PROG, description=pipeline.PURPOSE.replace("%", "%%"))
     sub = parser.add_subparsers(dest="command", required=True)
     go = sub.add_parser("run", help="run on your data")
