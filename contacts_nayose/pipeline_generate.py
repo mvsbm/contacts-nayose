@@ -12,18 +12,18 @@ PURPOSE = ('Generate CRM-shaped contacts with realistic dirt and their answer ke
 # The workflow's App inputs: name -> [default, type, description, choices].
 INPUTS = {'profile': ['company_hard',
              'COMBO',
-             'How dirty, and with real names and companies or not (real and company profiles need '
-             'the public sources downloaded once).',
+             'How dirty. Lifelike and company profiles take names from public lists (downloaded '
+             'once). All contacts are synthetic.',
              ['base',
               'dirty',
               'sparse',
               'lookalike',
               'wild',
               'hard',
-              'real',
+              'lifelike',
               'company',
               'company_hard',
-              'real_hard']],
+              'lifelike_hard']],
  'contacts': [10000, 'INT', 'About how many contacts to generate.', None],
  'seed': [7, 'INT', 'The same seed gives the same data.', None]}
 OUTPUTS = ['folder', 'answer_key']

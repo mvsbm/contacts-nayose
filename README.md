@@ -2,11 +2,7 @@
 
 Give every contact one entity id: contacts of the same person or company share it, and uncertain pairs go to you.
 
-How it works and why it is built this way:
-- [the pipeline, step by step](#how-it-works);
-- [what each method adds](#what-each-method-adds), and [what was tried and dropped](#what-was-tried-and-dropped);
-- [its limits](#limits);
-- [how the test data is made](#how-the-synthetic-data-is-made).
+How it works and why: [How it works](#how-it-works) · [What each method adds](#what-each-method-adds) · [What was tried and dropped](#what-was-tried-and-dropped) · [Limits](#limits) · [How the synthetic data is made](#how-the-synthetic-data-is-made).
 
 Exported from Agent Workflow Studio (release 1.0.0 of the workflow API `contacts-nayose`). It is the same
 logic the studio runs (`contacts_nayose/core/`), without ComfyUI. Regenerate it from the studio rather than
@@ -48,7 +44,7 @@ Measure contact matching on generated contacts with an answer key: the same stag
 
 | Option | What it is | Default |
 |---|---|---|
-| `--profile` | How dirty, and with real names and companies or not (real and company profiles need the public sources downloaded once). | `company_hard` |
+| `--profile` | How dirty. Lifelike and company profiles take names from public lists (downloaded once). All contacts are synthetic. | `company_hard` |
 | `--contacts` | About how many contacts to generate. | `10000` |
 | `--seed` | The same seed gives the same data. | `7` |
 | `--budget` | How many reviews the simulated reviewer makes (about 1,000 for a good model). | `1000` |
@@ -60,7 +56,7 @@ Generate CRM-shaped contacts with realistic dirt and their answer key, to try or
 
 | Option | What it is | Default |
 |---|---|---|
-| `--profile` | How dirty, and with real names and companies or not (real and company profiles need the public sources downloaded once). | `company_hard` |
+| `--profile` | How dirty. Lifelike and company profiles take names from public lists (downloaded once). All contacts are synthetic. | `company_hard` |
 | `--contacts` | About how many contacts to generate. | `10000` |
 | `--seed` | The same seed gives the same data. | `7` |
 | `--out` | Where its results and run folders go | `generate` |
@@ -82,11 +78,11 @@ Generate CRM-shaped contacts with realistic dirt and their answer key, to try or
 - **A model learns the weights from your reviews (logistic regression, active learning).** It beat fixed rules, Fellegi–Sunter and gradient boosting in every trial. Instead of: hand-set points.
 - **No embeddings or reranker.** Neither improved the result at 100,000 contacts (research/contacts_er/RESULTS.md). Instead of: a dense index and a cross-encoder.
 - **Uncertain pairs and disputed reviews go to you.** A wrong merge costs more than a question. Instead of: auto-deciding everything.
-- **Its quality comes from your reviews: about 1,000 make it good. Review a round, run again; a larger round (reviews per round 200) means fewer runs.** Measured on the hard 10k benchmark: no reviews F1 0.54 (precision 0.85, recall 0.39); 1,000 reviews F1 0.96 (precision 0.99, recall 0.94). Instead of: fixed weights tuned on synthetic data, which would not fit yours.
+- **Its quality comes from your reviews: about 1,000 make it good. Review a round, run again; a larger round (reviews per round 200) means fewer runs.** Measured on the company_hard 10k synthetic benchmark: no reviews F1 0.54 (precision 0.85, recall 0.39); 1,000 reviews F1 0.96 (precision 0.98, recall 0.93). Instead of: fixed weights tuned on synthetic data, which would not fit yours.
 
-## Optional: real-data
+## Optional: synthetic-data
 
-`pip install ".[real-data]"`, then `python -m contacts_nayose.nayose_bench.sources` downloads the public data the real and company profiles use, once: real names (NVIDIA Nemotron-Personas-Japan, CC BY 4.0), readings (UniDic, JMnedict: share-alike), towns (Japan Post) and companies (National Tax Agency corporate numbers: 出典：国税庁法人番号公表サイト). Their licences apply; nothing is shipped with this package.
+`pip install ".[synthetic-data]"`, then `python -m contacts_nayose.nayose_bench.sources` downloads, once, the public lists the lifelike and company profiles draw their synthetic contacts from: name frequencies (NVIDIA Nemotron-Personas-Japan, CC BY 4.0), readings (UniDic, JMnedict: share-alike), towns (Japan Post) and company names (National Tax Agency corporate numbers: 出典：国税庁法人番号公表サイト). Their licences apply; nothing is shipped with this package.
 
 ## Reference data
 
@@ -141,7 +137,7 @@ addresses (many per contact).
 |---|---|---|
 | Kanji | Full-width forms and spaces removed; variant kanji folded | 髙橋 → 高橋, 﨑 → 崎, 邊 → 辺 |
 | Kana | Hiragana to katakana and half-width to full-width; small kana to large (old systems cannot store them); ヅ/ヂ → ズ/ジ; long vowels folded | おおの, ｵｵﾉ, オーノ → オノ |
-| An unvoiced key | Dakuten dropped, so a clerk's guessed reading still meets | ヤマザキ and ヤマサキ meet |
+| An unvoiced key | Dakuten dropped, so a clerk's guessed reading still meets. A name written with ヅ/ヂ gets a second key, unvoiced as written (ツ/チ, where the first gives ス/シ). | ヤマザキ and ヤマサキ meet; ナカヅカ meets both ナカズカ and ナカツカ; マツダ and マスダ stay apart |
 | Kana OCR repair | Kanji that OCR read into kana fields become kana again | 八ラダ → ハラダ |
 | Misplaced kana | Kana typed in the kanji field moves to the kana field | |
 | Phones | Digits only; +81 → 0; a lost leading 0 restored; placeholders (000…) and wrong lengths dropped | 70(3026)1290 → 07030261290 |
@@ -175,11 +171,23 @@ nothing about who is who.
 | Group | The numbers |
 |---|---|
 | Names | Jaro–Winkler similarity of the full name, surname and given name (kana and kanji); exact agreement; first and last name swapped; how rare the shared name is |
-| Birth date | exact; day and month swapped; how many digits differ; years apart; how many contacts share it (at 100,000 contacts a birth date is far from unique) |
+| Birth date | exact; day and month swapped; how many digits differ; years apart (at most 50, so a mistyped year like 1067 is no outlier); how many contacts share it (at 100,000 contacts a birth date is far from unique) |
 | Phones and houses | how many are shared, and how common the shared value is (a family landline versus a switchboard) |
 | Addresses | best text similarity, same town, same room |
 | Companies | both companies; one a company and one a person; the person/company flag; name-core similarity and equality |
 | Other | gender; which fields are blank; kana filled from learned readings |
+
+**The text similarity used:**
+- **Comparing two names or addresses:** Jaro–Winkler. It counts the characters two strings share
+  within a small window, discounts transposed ones, and gives extra weight to a shared beginning.
+  It suits short strings such as names, where a typo or a dropped character should cost little.
+  It runs on the standardized kana and kanji, so variant kanji, kana width and long vowels are
+  already folded.
+- **Finding similar names among all contacts:** TF-IDF over 2-character pieces with cosine
+  similarity. Each name becomes its set of 2-character pieces, rare pieces weigh more, and every
+  contact's 10 nearest names above 0.5 become candidates. This is a sparse matrix product (scipy).
+- **Not used:** dense embeddings (ruri-v3) and a cross-encoder. Both were tried and dropped; see
+  [what was tried and dropped](#what-was-tried-and-dropped).
 
 ## 5. Learn from your reviews
 
@@ -257,7 +265,7 @@ kana name after OCR repair, a swapped birth date, a learned reading and a repair
 - Every dropped method was tried again on the final pipeline.
 - The reviewer is simulated from the answer key.
 - The research code is in the studio repo ([RESULTS.md](https://github.com/mvsbm/agent-workflow-studio/blob/9845b93/research/contacts_er/RESULTS.md)).
-- This package's code reproduces the research F1 to within 0.0005.
+- This package's code reproduced the research F1 to within 0.0005, before the [fixes since the research](#what-each-method-adds) listed at the end of this section.
 
 **F1 after each kept step** (base test data, seed 7, 10,000 contacts). The steps, in order: standardize, shared phone
 and house candidates (set keys), the model on 300 reviews, 1,000 reviews, guarded clustering, similar-name
@@ -292,7 +300,7 @@ says otherwise):
 | Birth date + town candidates | contacts with no usable name | +0.0027 / +0.0023 |
 | How many contacts share the birth date (a feature) | false merges in large lists | at 100,000 contacts, false merges 11,953 → 6,750 (F1 0.8158 → 0.8431) |
 | Review audit | a reviewer who is wrong 5% of the time | F1 0.9801 → 0.9902 (36 of 44 wrong reviews caught for 72 extra questions); hard 0.8735 → 0.8805 |
-| A shop's base name as an alias | sole proprietors (藤江不動産 ↔ 藤江 太郎) | real hard data: shop-to-owner links 71 → 82; F1 +0.0023 / +0.0027 |
+| A shop's base name as an alias | sole proprietors (藤江不動産 ↔ 藤江 太郎) | lifelike hard data: shop-to-owner links 71 → 82; F1 +0.0023 / +0.0027 |
 | Company field cleaning and the name core | 御中, departments, (株)/㈱, branches | company hard data: company false merges 161 → 52 (seed 7) |
 | Same name core (a feature) | the same company written differently | company hard data: missed company pairs 134 → 73 / 102 → 32 |
 
@@ -330,25 +338,37 @@ xychart-beta
 ```mermaid
 xychart-beta
     title "F1 by number of reviews (hard profile)"
-    x-axis "reviews" ["0", "100", "350", "1000", "3000"]
+    x-axis "reviews" ["0", "100", "300", "1000", "3000"]
     y-axis "F1" 0.6 --> 1.0
-    bar [0.730, 0.795, 0.835, 0.892, 0.903]
+    bar [0.731, 0.775, 0.872, 0.893, 0.905]
 ```
 
 | Reviews | F1 | Precision | Recall |
 |---|---|---|---|
-| 0 (day 0) | 0.730 | 0.677 | 0.791 |
-| 100 | 0.795 | 0.786 | 0.804 |
-| 350 | 0.835 | 0.854 | 0.818 |
-| 1,000 | 0.892 | 0.962 | 0.831 |
-| 3,000 | 0.903 | 0.989 | 0.831 |
+| 0 (day 0) | 0.731 | 0.679 | 0.791 |
+| 100 | 0.775 | 0.886 | 0.689 |
+| 300 | 0.872 | 0.936 | 0.815 |
+| 1,000 | 0.893 | 0.964 | 0.831 |
+| 3,000 | 0.905 | 0.992 | 0.832 |
 
 Reviews mostly buy precision (fewer wrong merges). Recall stops near 0.83 because about 19% of the
 true pairs share nothing but a birth date ([limits](#limits)).
 
-With real names and companies (`company_hard`, which needs the download):
-- no reviews: F1 0.54;
-- 1,000 reviews: F1 0.96 (precision 0.99, recall 0.94).
+On the company-heavy synthetic data (`company_hard`: names, towns and companies drawn from public lists; it needs the download):
+- no reviews: F1 0.54 (precision 0.85, recall 0.39);
+- 1,000 reviews: F1 0.96 (precision 0.98, recall 0.93; 0.957 to 0.958 over seeds 7, 11 and 3).
+
+The order in which pairs come up for review moves F1 by about ±0.003 on company data and ±0.001
+on the hard data (five review orders, the same data).
+
+**Fixes since the research.** Each was measured the same way: the same candidates and features,
+with five review orders.
+
+| Fix | What went wrong | Effect |
+|---|---|---|
+| Years apart is capped at 50 | A typo in the first digit of a birth year (1967 typed as 1067; about 3 contacts in 1,000) puts a true pair 900 years apart. When such a pair was among the reviews, the model learned that a huge gap means "same", and about 400 strangers merged. | hard seed 7: F1 0.876 ± 0.023 → 0.893 ± 0.000 (two of the five review orders had fallen to 0.851); hard seed 11: 0.887 → 0.889; company_hard: 0.960 → 0.960 and 0.959 → 0.959 |
+| A second unvoiced key for names written with ヅ/ヂ | ナカツカ, a clerk's unvoiced guess, never met ナカヅカ | ナカヅカ now meets both ナカズカ and ナカツカ. F1 is unchanged within the noise, since it touches a few dozen contacts in 10,000. |
+| The similar-name search no longer depends on Python's hash order | The same input gave slightly different candidates from run to run, so a pair you had reviewed could drop out of the next run | the same input now gives the same result |
 
 # What was tried and dropped
 
@@ -365,8 +385,8 @@ With real names and companies (`company_hard`, which needs the download):
 | Cleaning person fields (様/殿, notes, gender codes, phone notes) | wild CRM dirt | −0.0154 / +0.0027 on hard data | inconsistent |
 | Placeholder birth dates found by frequency | 1900-01-01 and the like | −0.0021 / +0.0010 on hard data; +0.0108 on wild | it helps only where placeholders dominate |
 | Company name core as a candidate key | companies | ±0.0009, within noise | every missed company pair was already a candidate; the model scored it apart |
-| A legal form meaning "never a person" (cannot-link) | keeping people and companies apart | F1 fell on all four real datasets (real 7: 0.9876 against 0.9912) | A department in FIRST_NAME makes a company contact look like a person, so it split companies. The pipeline never merged a person with a company anyway. |
-| Trusting the person/company flag for that | the same | real 7: 0.9682 | wrong flags split shops from their owners (71 → 13 linked) |
+| A legal form meaning "never a person" (cannot-link) | keeping people and companies apart | F1 fell on all four lifelike datasets (seed 7: 0.9876 against 0.9912) | A department in FIRST_NAME makes a company contact look like a person, so it split companies. The pipeline never merged a person with a company anyway. |
+| Trusting the person/company flag for that | the same | lifelike seed 7: 0.9682 | wrong flags split shops from their owners (71 → 13 linked) |
 | Extra company features (same core and founding date; shared phone but different core) | the last company errors | +0.0002 to +0.0014, within noise over 5 seeds | |
 | Gender and name-frequency features | | no effect when removed | still computed (harmless to a regularised model); nothing depends on them |
 | The corroboration rule as the default | fewer wrong merges | 87% fewer false merges, but at 100,000 hard contacts recall fell 0.799 → 0.479 and 34,636 pairs went to review | moves the work to people; kept as an option (`--corroboration`) |
@@ -409,18 +429,29 @@ What remains wrong after 1,000 reviews:
   - company contacts that stack several kinds of dirt.
 
 **What has not been proven:**
-- The test data comes from our own generator, and real data will have mess we did not imagine. The decisive check is a labelled sample of your real data, matched on your own machine; nothing leaves it.
+- The test data comes from our own generator, and your own data will have mess we did not imagine. The decisive check is a labelled sample of your own data, matched on your own machine; nothing leaves it.
 - The largest measured run is 100,000 contacts. 1,000,000 has not been run.
+
+## Research consulted
+
+- Blocking: Papadakis et al., blocking surveys (arXiv:1905.06167, arXiv:2202.12521); Thirumuruganathan et al., DeepBlocker (PVLDB 2021); Zeakis et al. (arXiv:2304.12329).
+- Fellegi–Sunter and term frequency: the Splink documentation.
+- Active learning: Kasai et al. (ACL 2019).
+- Learned and LLM matching: Ditto (VLDB 2021); Peeters et al. (EDBT 2025).
+- Benchmarks and metrics: OpenSanctions Pairs (arXiv:2603.11051); Menestrina et al. (PVLDB 2010).
+- Japanese models: the ruri-v3 model cards.
+- Address parsing against a town registry: Geolonia normalize-japanese-addresses; Digital Agency abr-geocoder.
 
 ---
 
 # How the synthetic data is made
 
 There is no public Japanese CRM with an answer key, and customer data must not leave its machine. So
-the tests use synthetic contacts in the shape of a real CRM export, generated together with the
+the tests use synthetic contacts in the shape of a CRM export, generated together with the
 answer (which contacts are one person). `contacts-nayose generate` writes them;
 `contacts-nayose benchmark` generates, matches and scores in one go. The same profile, size and
-seed always give the same data. The generator uses only the standard library.
+seed always give the same data. The generator uses only the standard library. Every contact is
+synthetic: no customer data is used or shipped.
 
 ```mermaid
 flowchart LR
@@ -441,7 +472,7 @@ flowchart LR
 - Children leave home and move.
 - 4% of births are twins, and 2% of sons are named after their father.
 - Look-alike strangers are added: the same name as an existing customer, and in 35% of cases the same birth date too.
-- Addresses go through real municipality mergers (田無市 became 西東京市 in 2001), so old town names appear.
+- Addresses go through actual municipality mergers (田無市 became 西東京市 in 2001), so old town names appear.
 
 **3. Contacts.**
 - Each person is registered 1 to 8 times between 1988 and 2025: 55% once, 25% twice, the rest more.
@@ -451,7 +482,7 @@ flowchart LR
 - Values are shared on purpose: a household's landline and address, a workplace switchboard, a care home's address.
 - Contact ids are shuffled, so they say nothing about who is who.
 
-**4. Dirt**, as real CRM data goes bad:
+**4. Dirt**, the ways CRM data goes bad in practice:
 - variant kanji, and homophone kanji (a name heard on the phone);
 - guessed readings, kana width, lost small kana and long-vowel spellings;
 - OCR misreads and typos;
@@ -471,8 +502,8 @@ xychart-beta horizontal
     bar [6684, 5605, 3922, 3894, 2263, 1960, 1549, 1442, 1354, 1351, 1106, 1091, 936, 744, 721]
 ```
 
-**5. Companies and sole proprietors** (the `real` and `company` profiles).
-- Companies come from the National Tax Agency registry: real names with furigana and real head offices.
+**5. Companies and sole proprietors** (the `lifelike` and `company` profiles).
+- Company names, furigana and head offices are drawn from the National Tax Agency's public registry. The contacts themselves (who registered, when, with which phone) are synthetic.
 - They come with the registry's own events:
   - renamed (6% of companies);
   - head office moved (6%);
@@ -498,19 +529,9 @@ xychart-beta horizontal
 | `lookalike` | 5× look-alike strangers, a population heavy in common names | no |
 | `wild` | CRM mess: 様/殿 and （旧姓 X） in name fields, the whole name in the surname field, romaji in the kanji field, four gender code styles, placeholder birth dates, extensions and two numbers in one phone field, 同上 and postal-code-only addresses | no |
 | `hard` | all of the above at once | no |
-| `real`, `real_hard` | real name frequencies and readings (Nemotron-Personas-Japan, UniDic, JMnedict), real towns (Japan Post), 12% companies, 8% sole proprietors | yes |
+| `lifelike`, `lifelike_hard` | names drawn by their frequency in public lists, with readings (Nemotron-Personas-Japan, UniDic, JMnedict), towns from Japan Post, 12% companies, 8% sole proprietors | yes |
 | `company`, `company_hard` | 35% companies, with the registry's events and staff dirt | yes |
 
 The answer key (`<name>_key/answer_key_contacts.csv`) gives every CONT_ID its true entity, and tags
 naming how that contact was damaged. Scores are pairwise and B-cubed precision, recall and F1
 against it.
-
-## Research consulted
-
-- Blocking: Papadakis et al., blocking surveys (arXiv:1905.06167, arXiv:2202.12521); Thirumuruganathan et al., DeepBlocker (PVLDB 2021); Zeakis et al. (arXiv:2304.12329).
-- Fellegi–Sunter and term frequency: the Splink documentation.
-- Active learning: Kasai et al. (ACL 2019).
-- Learned and LLM matching: Ditto (VLDB 2021); Peeters et al. (EDBT 2025).
-- Benchmarks and metrics: OpenSanctions Pairs (arXiv:2603.11051); Menestrina et al. (PVLDB 2010).
-- Japanese models: the ruri-v3 model cards.
-- Address parsing against a town registry: Geolonia normalize-japanese-addresses; Digital Agency abr-geocoder.
