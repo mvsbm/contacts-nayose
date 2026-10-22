@@ -3,7 +3,7 @@
  "api": "contacts-nayose",
  "release": "1.0.0",
  "workflow_id": "7786e1ce-827b-49ed-b95a-9efb688e1dee",
- "studio_version": "8c3b874d517adc140848f977cc367621a0cf7b7e",
+ "studio_version": "7b244b077ee66b0be41b43fd467f1f6c73278729",
  "commands": {
   "benchmark": {
    "api": "contacts-nayose-benchmark",
@@ -20,12 +20,12 @@
   "candidates.py": "841eb81311ab15a1",
   "checks.py": "a0b0901691876c08",
   "clusters.py": "2f5fb3d539647e94",
-  "contacts.py": "4b7bb470eb1308bb",
-  "context.py": "333c3b782d7e3caf",
+  "contacts.py": "42d548171bb12727",
+  "context.py": "d437329151b89504",
   "decide.py": "c7649457278f7e8a",
   "features.py": "43a6c7a18d0ea15b",
   "learn.py": "bb906728e931d07c",
-  "runner.py": "778672bc0225dc7a",
+  "runner.py": "d373ae34c485e81f",
   "steps.py": "a7bb86dcdc64f44a"
  }
 }
