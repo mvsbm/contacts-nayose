@@ -15,3 +15,5 @@ jobs:
       - run: pip install . pytest
       - run: contacts-nayose check
       - run: pytest -q
+      - run: contacts-nayose init config.yaml
+      - run: contacts-nayose run --config config.yaml --exports contacts_nayose/examples/E1/sample --out out
