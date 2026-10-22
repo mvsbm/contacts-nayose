@@ -1,0 +1,20 @@
+{
+ "workflow": "Contact matching",
+ "api": "contacts-nayose",
+ "release": "1.0.0",
+ "workflow_id": "687ef588-18dd-46a2-a4d2-83a14053e5fe",
+ "studio_version": "b2229fe2c1bb6cb5dc85de6ee860aece42f5f60f",
+ "core": {
+  "__init__.py": "2b375360b845f1f9",
+  "candidates.py": "841eb81311ab15a1",
+  "checks.py": "a0b0901691876c08",
+  "clusters.py": "2f5fb3d539647e94",
+  "contacts.py": "4b7bb470eb1308bb",
+  "context.py": "333c3b782d7e3caf",
+  "decide.py": "c7649457278f7e8a",
+  "features.py": "43a6c7a18d0ea15b",
+  "learn.py": "bb906728e931d07c",
+  "runner.py": "cbf9225fa5c9f9ab",
+  "steps.py": "a7bb86dcdc64f44a"
+ }
+}

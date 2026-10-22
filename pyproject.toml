@@ -1,0 +1,19 @@
+[project]
+name = "contacts-nayose"
+version = "1.0.0"
+description = "Give every contact one entity id: contacts of the same person or company share it, and uncertain pairs go to you."
+requires-python = ">=3.11"
+dependencies = ["numpy==2.5.3", "pyyaml==6.0.3", "scipy==1.18.1"]
+
+[project.scripts]
+contacts-nayose = "contacts_nayose.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["contacts_nayose*"]
+
+[tool.setuptools.package-data]
+"*" = ["reference/*", "examples/**/*"]
