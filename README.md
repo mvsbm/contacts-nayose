@@ -34,6 +34,32 @@ Results go to `out/`: `entities`, `review_queue`. When the workflow asks you to 
 | `--corroboration` | A merge also needs a shared phone, house, town or alias, not only name and birth date. | `False` |
 | `--max-size` | The most contacts one entity may have. | `12` |
 
+## More commands
+
+### `contacts-nayose benchmark`
+
+Measure contact matching on generated contacts with an answer key: the same stages as Contact matching, with a reviewer who knows the answers.
+
+| Option | What it is | Default |
+|---|---|---|
+| `--profile` | How dirty, and with real names and companies or not (real and company profiles need the public sources downloaded once). | `company_hard` |
+| `--contacts` | About how many contacts to generate. | `10000` |
+| `--seed` | The same seed gives the same data. | `7` |
+| `--budget` | How many reviews the simulated reviewer makes (about 1,000 for a good model). | `1000` |
+| `--out` | Where its results and run folders go | `benchmark` |
+
+### `contacts-nayose generate`
+
+Generate CRM-shaped contacts with realistic dirt and their answer key, to try or measure contact matching.
+
+| Option | What it is | Default |
+|---|---|---|
+| `--profile` | How dirty, and with real names and companies or not (real and company profiles need the public sources downloaded once). | `company_hard` |
+| `--contacts` | About how many contacts to generate. | `10000` |
+| `--seed` | The same seed gives the same data. | `7` |
+| `--out` | Where its results and run folders go | `generate` |
+
+
 ## Steps
 
 1. **read**: Read your contact exports through the column map: one contact per key, phones and addresses attached.
@@ -44,6 +70,17 @@ Results go to `out/`: `entities`, `review_queue`. When the workflow asks you to 
 6. **decide**: Decide each pair: match, to review, or different.
 7. **group**: Group matched contacts into entities, refusing merges decided different.
 8. **publish**: Give every contact its entity id.
+
+## Decisions
+
+- **A model learns the weights from your reviews (logistic regression, active learning).** It beat fixed rules, Fellegi–Sunter and gradient boosting in every trial. Instead of: hand-set points.
+- **No embeddings or reranker.** Neither improved the result at 100,000 contacts (research/contacts_er/RESULTS.md). Instead of: a dense index and a cross-encoder.
+- **Uncertain pairs and disputed reviews go to you.** A wrong merge costs more than a question. Instead of: auto-deciding everything.
+- **Its quality comes from your reviews: about 1,000 make it good. Review a round, run again; a larger round (reviews per round 200) means fewer runs.** Measured on the hard 10k benchmark: no reviews F1 0.54 (precision 0.85, recall 0.39); 1,000 reviews F1 0.96 (precision 0.99, recall 0.94). Instead of: fixed weights tuned on synthetic data, which would not fit yours.
+
+## Optional: real-data
+
+`pip install ".[real-data]"`, then `python -m contacts_nayose.nayose_bench.sources` downloads the public data the real and company profiles use, once: real names (NVIDIA Nemotron-Personas-Japan, CC BY 4.0), readings (UniDic, JMnedict: share-alike), towns (Japan Post) and companies (National Tax Agency corporate numbers: 出典：国税庁法人番号公表サイト). Their licences apply; nothing is shipped with this package.
 
 ## Reference data
 

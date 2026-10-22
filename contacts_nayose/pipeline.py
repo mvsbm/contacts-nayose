@@ -9,10 +9,11 @@ HERE = Path(__file__).parent
 TITLE, VERSION = 'Contact matching', '1.0.0'
 PURPOSE = ('Give every contact one entity id: contacts of the same person or company share it, and uncertain '
  'pairs go to you.')
-# The workflow's App inputs: name -> [default, type, description].
+# The workflow's App inputs: name -> [default, type, description, choices].
 INPUTS = {'exports': ['sample',
              'COMBO',
-             'The folder with your contact exports (contacts, phones and addresses CSV files).'],
+             'The folder with your contact exports (contacts, phones and addresses CSV files).',
+             None],
  'columns': ['# Which column holds what. Files are in the data folder. Only key, birth_date and '
              'one name\n'
              '# column are required; leave out what your data does not have.\n'
@@ -30,17 +31,20 @@ INPUTS = {'exports': ['sample',
              'of one address\n',
              'STRING',
              'The column map: which column of your exports holds the key, names, birth date, '
-             'phones and addresses.'],
- 'batch': [50, 'INT', 'How many pairs to ask you about each run.'],
+             'phones and addresses.',
+             None],
+ 'batch': [50, 'INT', 'How many pairs to ask you about each run.', None],
  'match_at': [0.5,
               'FLOAT',
-              'Merge pairs at least this likely to be the same (raise it for fewer wrong merges).'],
- 'review_from': [0.1, 'FLOAT', 'Pairs from here up to Match at go to your review queue.'],
+              'Merge pairs at least this likely to be the same (raise it for fewer wrong merges).',
+              None],
+ 'review_from': [0.1, 'FLOAT', 'Pairs from here up to Match at go to your review queue.', None],
  'corroboration': [False,
                    'BOOLEAN',
                    'A merge also needs a shared phone, house, town or alias, not only name and '
-                   'birth date.'],
- 'max_size': [12, 'INT', 'The most contacts one entity may have.']}
+                   'birth date.',
+                   None],
+ 'max_size': [12, 'INT', 'The most contacts one entity may have.', None]}
 OUTPUTS = ['entities', 'review_queue']
 FOLDERS = ['exports']  # inputs that name a data folder
 EXAMPLES = [{'id': 'E1',
@@ -53,7 +57,7 @@ EXAMPLES = [{'id': 'E1',
 
 def run(out, labels=None, **given):
     """Run the workflow; `given` overrides any input. Returns the runtime (checks, outputs, lines)."""
-    values = {k: (given[k] if given.get(k) is not None else d) for k, (d, _, _) in INPUTS.items()}
+    values = {k: (given[k] if given.get(k) is not None else d) for k, (d, *_) in INPUTS.items()}
     input_dir = Path(out)
     for name in FOLDERS:
         folder = Path(str(values[name]).replace("@examples", str(HERE / "examples"), 1)).resolve()

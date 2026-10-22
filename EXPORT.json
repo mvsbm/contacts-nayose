@@ -2,10 +2,21 @@
  "workflow": "Contact matching",
  "api": "contacts-nayose",
  "release": "1.0.0",
- "workflow_id": "687ef588-18dd-46a2-a4d2-83a14053e5fe",
- "studio_version": "ece3396d4bdea922d00f21c211e115201c347fa9",
+ "workflow_id": "7786e1ce-827b-49ed-b95a-9efb688e1dee",
+ "studio_version": "8c3b874d517adc140848f977cc367621a0cf7b7e",
+ "commands": {
+  "benchmark": {
+   "api": "contacts-nayose-benchmark",
+   "release": "1.0.0"
+  },
+  "generate": {
+   "api": "contacts-nayose-generate",
+   "release": "1.0.0"
+  }
+ },
  "core": {
   "__init__.py": "2b375360b845f1f9",
+  "bench.py": "edb443446c213082",
   "candidates.py": "841eb81311ab15a1",
   "checks.py": "a0b0901691876c08",
   "clusters.py": "2f5fb3d539647e94",
@@ -14,7 +25,7 @@
   "decide.py": "c7649457278f7e8a",
   "features.py": "43a6c7a18d0ea15b",
   "learn.py": "bb906728e931d07c",
-  "runner.py": "cbf9225fa5c9f9ab",
+  "runner.py": "778672bc0225dc7a",
   "steps.py": "a7bb86dcdc64f44a"
  }
 }
